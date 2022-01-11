@@ -13,7 +13,7 @@ def validate_input(user_input):
     )
     res = date_regex.fullmatch(user_input)
     if res is None:
-        raise CustomError("InvalidDateException")
+        raise CustomError("Invalid date exception")
 
 
 def calculate_weekday(user_input):
@@ -56,7 +56,7 @@ def read_date():
     validate_input(user_input)
     date_time = calculate_weekday(user_input)
     if date_time["weekday_name"] == "Saturday" or date_time["weekday_name"] == "Sunday":
-        raise CustomError("Cannot submit on weekends!")
+        raise CustomError("Weekend exception")
     return date_time
 
 
@@ -65,6 +65,8 @@ def read_turnaround():
     turnaround = {}
     turnaround["hours"] = int(input())
     hours = turnaround["hours"]
+    if hours < 0:
+        raise CustomError("Negative turnaround exception")
     turnaround["working_days"] = hours // 8
     turnaround["working_hours"] = hours % 8
     return turnaround
@@ -76,7 +78,7 @@ def main():
     weekday = date_time["weekday_name"]
     print(f"Valid date! It's a {weekday}.")
     print("Please enter a turnaround time (integer hours):")
-    read_turnaround()
+    turnaround = read_turnaround()
 
 
 if __name__ == '__main__':

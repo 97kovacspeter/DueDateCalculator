@@ -20,45 +20,63 @@ def calculate_weekday(user_input):
     split_input = user_input.split(" ")
     date = split_input[0]
     split_date = date.split(".")
-    date_time = {}
-    date_time["year"] = int(split_date[0])
-    date_time["month"] = int(split_date[1])
-    date_time["day"] = int(split_date[2])
+    year = int(split_date[0])
+    month = int(split_date[1])
+    day = int(split_date[2])
 
     # Required month shifting for the doomsday algorithm
-    if date_time["month"] < 3:
-        date_time["year"] -= 1
-        date_time["month"] += 10
+    if month < 3:
+        year -= 1
+        month += 10
     else:
-        date_time["month"] -= 2
+        month -= 2
 
-    century = math.floor(date_time["year"]/100)
-    year = date_time["year"] - century*100
+    century = math.floor(year/100)
+    year = year - century*100
 
     # Doomsday algorithm
-    weekday_nr = (date_time["day"] + math.floor(2.6*date_time["month"] - 0.2) - 2*century +
+    weekday_nr = (day + math.floor(2.6*month - 0.2) - 2*century +
                   year + math.floor(year/4) + math.floor(century/4)) % 7
 
     day_names = ["Sunday", "Monday", "Tuesday",
                  "Wednesday", "Thursday", "Friday", "Saturday"]
 
+    date_time = {}
+    date_time["century"] = century
+    date_time["year"] = year
+    date_time["month"] = month
+    date_time["day"] = day
     date_time["weekday_nr"] = weekday_nr
     date_time["weekday_name"] = day_names[weekday_nr]
     return date_time
 
 
 def read_date():
-    print("Please provide a submit date (yyyy.mm.dd hh:mm format):")
     user_input = input()
     validate_input(user_input)
-    weekday = calculate_weekday(user_input)
-    if weekday == "Saturday" or weekday == "Sunday":
+    date_time = calculate_weekday(user_input)
+    if date_time["weekday_name"] == "Saturday" or date_time["weekday_name"] == "Sunday":
         raise CustomError("Cannot submit on weekends!")
-    return weekday
+    return date_time
+
+
+def read_turnaround():
+    # Raises ValueError if not integer is given
+    turnaround = {}
+    turnaround["hours"] = int(input())
+    hours = turnaround["hours"]
+    turnaround["working_days"] = hours // 8
+    turnaround["working_hours"] = hours % 8
+    return turnaround
 
 
 def main():
-    read_date()
+    print("Please provide a submit date (yyyy.mm.dd hh:mm format):")
+    date_time = read_date()
+    weekday = date_time["weekday_name"]
+    print(f"Valid date! It's a {weekday}.")
+    print("Please enter a turnaround time (integer hours):")
+    read_turnaround()
 
 
 if __name__ == '__main__':

@@ -94,6 +94,8 @@ def calculate_due_date(submit_time, turnaround):
 
 
 def write_date(due_date):
+    if due_date["month"] < 10:
+        due_date["month"] = "0" + str(due_date["month"])
     date = [str(due_date["year"]),
             str(due_date["month"]), str(due_date["day"])]
     time = [str(due_date["hour"]), str(due_date["minute"])]

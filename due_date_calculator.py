@@ -1,5 +1,6 @@
 import re
 import math
+from this import d
 
 
 class CustomError(Exception):
@@ -16,20 +17,20 @@ def validate_input(user_input):
         raise CustomError("Invalid date exception")
 
 
-def calculate_weekday(user_input):
+def calculate_submit_time(user_input):
     split_input = user_input.split(" ")
     date = split_input[0]
+    time = split_input[1]
     split_date = date.split(".")
     year = int(split_date[0])
     month = int(split_date[1])
     day = int(split_date[2])
 
     # Required month shifting for the doomsday algorithm
-    if month < 3:
+    month -= 2
+    if month < 1:
         year -= 1
-        month += 10
-    else:
-        month -= 2
+        month += 12
 
     century = math.floor(year/100)
     year = year - century*100
@@ -41,23 +42,24 @@ def calculate_weekday(user_input):
     day_names = ["Sunday", "Monday", "Tuesday",
                  "Wednesday", "Thursday", "Friday", "Saturday"]
 
-    date_time = {}
-    date_time["century"] = century
-    date_time["year"] = year
-    date_time["month"] = month
-    date_time["day"] = day
-    date_time["weekday_nr"] = weekday_nr
-    date_time["weekday_name"] = day_names[weekday_nr]
-    return date_time
+    submit_time = {}
+    submit_time["century"] = century
+    submit_time["year"] = year
+    submit_time["month"] = month
+    submit_time["weekday_nr"] = weekday_nr
+    submit_time["weekday_name"] = day_names[weekday_nr]
+    submit_time["day"] = day
+    submit_time["time"] = time
+    return submit_time
 
 
 def read_date():
     user_input = input()
     validate_input(user_input)
-    date_time = calculate_weekday(user_input)
-    if date_time["weekday_name"] == "Saturday" or date_time["weekday_name"] == "Sunday":
+    submit_time = calculate_submit_time(user_input)
+    if submit_time["weekday_name"] == "Saturday" or submit_time["weekday_name"] == "Sunday":
         raise CustomError("Weekend exception")
-    return date_time
+    return submit_time
 
 
 def read_turnaround():
@@ -72,13 +74,26 @@ def read_turnaround():
     return turnaround
 
 
+def calculate_due_date(submit_time, turnaround):
+    due_date = {}
+    split_time = submit_time["time"].split(":")
+    submit_hours = split_time[0]
+    submit_minutes = split_time[1]
+    due_date["minutes"] = submit_minutes
+    if submit_hours + turnaround["working_hours"] > 17:
+        due_date["hours"] = 9 + \
+            (turnaround["working_hours"] - (17-submit_hours))
+
+
 def main():
     print("Please provide a submit date (yyyy.mm.dd hh:mm format):")
-    date_time = read_date()
-    weekday = date_time["weekday_name"]
+    submit_time = read_date()
+    weekday = submit_time["weekday_name"]
     print(f"Valid date! It's a {weekday}.")
     print("Please enter a turnaround time (integer hours):")
     turnaround = read_turnaround()
+    due_date = calculate_due_date(submit_time, turnaround)
+    print(due_date)
 
 
 if __name__ == '__main__':

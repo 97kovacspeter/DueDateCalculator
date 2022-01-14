@@ -1,6 +1,5 @@
 import re
 import math
-from this import d
 
 
 class CustomError(Exception):
@@ -77,12 +76,31 @@ def read_turnaround():
 def calculate_due_date(submit_time, turnaround):
     due_date = {}
     split_time = submit_time["time"].split(":")
-    submit_hours = split_time[0]
-    submit_minutes = split_time[1]
-    due_date["minutes"] = submit_minutes
-    if submit_hours + turnaround["working_hours"] > 17:
-        due_date["hours"] = 9 + \
-            (turnaround["working_hours"] - (17-submit_hours))
+    submit_hour = int(split_time[0])
+    # minutes never change with integer hour increments
+    due_date["minute"] = int(split_time[1])
+    # day shifting
+    day_shifts = False
+    if submit_hour + turnaround["working_hours"] > 17:
+        due_date["hour"] = 9 + \
+            (turnaround["working_hours"] - (17-submit_hour))
+        day_shifts = True
+
+    # dummy
+    due_date["year"] = "2022"
+    due_date["month"] = "01"
+    due_date["day"] = "14"
+    return due_date
+
+
+def write_date(due_date):
+    date = [str(due_date["year"]),
+            str(due_date["month"]), str(due_date["day"])]
+    time = [str(due_date["hour"]), str(due_date["minute"])]
+    result = ".".join(date)
+    result += " "
+    result += ":".join(time)
+    print(result)
 
 
 def main():
@@ -93,7 +111,7 @@ def main():
     print("Please enter a turnaround time (integer hours):")
     turnaround = read_turnaround()
     due_date = calculate_due_date(submit_time, turnaround)
-    print(due_date)
+    write_date(due_date)
 
 
 if __name__ == '__main__':

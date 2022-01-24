@@ -3,18 +3,19 @@ import unittest
 # rossz dátum, zagyva
 # rossz dátum, nem létező
 # rossz dátum, munkaidőn kívül
-# jó dátum, rossz turnaround, zagyva
-# jó dátum, rossz turnaround, nem int
-# jó dátum, rossz turnaround, negatív
+# rossz turnaround, zagyva
+# rossz turnaround, nem int
+# rossz turnaround, negatív
 # aznap kész
+# 8-nál kevesebb óra, de átlóg másnapra
 # másnap ugyanakkor kész
 # pár napra rá kész
-# 8-nál kevesebb óra, de átlóg másnapra
-#
-#
-#
-#
+# átlóg a hétvégén
+# átlóg másik hónapra
+# átlóg másik évbe
 # pár óra, de átforgatja az évet is akár (century?)
+#
+#
 
 
 class TestDueDateMethods(unittest.TestCase):

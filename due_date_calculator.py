@@ -6,25 +6,67 @@ class CustomError(Exception):
     pass
 
 
+def add_days_to_date(submit_time, calendar_days):
+    year = submit_time["year"]
+    month = submit_time["month"]
+    day = submit_time["day"]
+    elapsed = days_elapsed(year, month, day)
+
+    y, m, d = 2022, 1, 27
+    return y, m, d
+
+
 def calculate_due_date(submit_time, turnaround):
     due_date = {}
-    split_time = submit_time["time"].split(":")
-    submit_hour = int(split_time[0])
+    submit_hour = submit_time["hour"]
     # minutes never change with integer hour increments
-    due_date["minute"] = int(split_time[1])
+    due_date["minute"] = submit_time["minute"]
     # day shifting
-    day_shifts = False
     due_date["hour"] = submit_hour + turnaround["working_hours"]
     if submit_hour + turnaround["working_hours"] > 17:
         due_date["hour"] = 9 + \
             (turnaround["working_hours"] - (17-submit_hour))
-        day_shifts = True
+        turnaround["working_days"] += 1
 
-    # dummy
-    due_date["year"] = 2022
-    due_date["month"] = 1
-    due_date["day"] = 14
+    weeks = turnaround["working_days"] // 5
+    remaining_days = turnaround["working_days"] % 5
+
+    calendar_days = weeks * 7 + remaining_days
+
+    y, m, d = add_days_to_date(submit_time, calendar_days)
+
+    due_date["year"] = y
+    due_date["month"] = m
+    due_date["day"] = d
     return due_date
+
+
+def days_elapsed(year, month, day):
+    elapsed = day
+    monthly_cummulation = {
+        11: 334,
+        10: 304,
+        9: 273,
+        8: 243,
+        7: 212,
+        6: 181,
+        5: 151,
+        4: 120,
+        3: 90,
+        2: 59,
+        1: 31,
+        0: 0
+    }
+    elapsed += monthly_cummulation[month-1]
+    if is_leapyear(year) and month > 2:
+        elapsed += 1
+    return elapsed
+
+
+def is_leapyear(year):
+    if (year % 100 != 0 and year % 4 == 0 or year % 400 == 0):
+        return True
+    return False
 
 
 def process_submit_time(user_input):
@@ -37,6 +79,10 @@ def process_submit_time(user_input):
     month = int(split_date[1])
     day = int(split_date[2])
 
+    split_time = time.split(":")
+    hour = int(split_time[0])
+    minute = int(split_time[1])
+
     weekday_nr = weekday_number(year, month, day)
 
     submit_time = {}
@@ -45,7 +91,8 @@ def process_submit_time(user_input):
     submit_time["weekday_nr"] = weekday_nr
     submit_time["weekday_name"] = weekday_name(weekday_nr)
     submit_time["day"] = day
-    submit_time["time"] = time
+    submit_time["hour"] = hour
+    submit_time["minute"] = minute
     return submit_time
 
 
@@ -118,10 +165,13 @@ def write_date(due_date):
 def main():
     print("Please provide a submit date (yyyy.mm.dd hh:mm format):")
     submit_time = read_date()
+
     weekday = submit_time["weekday_name"]
     print(f"Valid date! It's a {weekday}.")
+
     print("Please enter a turnaround time (integer hours):")
     turnaround = read_turnaround()
+
     due_date = calculate_due_date(submit_time, turnaround)
     write_date(due_date)
 

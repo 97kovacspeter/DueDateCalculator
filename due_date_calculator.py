@@ -16,24 +16,24 @@ def add_days_to_date(date, calendar_days):
     if is_leapyear(year):
         remaining_days = 366 - elapsed
 
-    elapsed = elapsed + calendar_days
+    new_elapsed = elapsed + calendar_days
     if calendar_days > remaining_days:
         calendar_days -= remaining_days
-        year, elapsed = reduce_elapsed_years(year, calendar_days)
-    month, day = date_from_elapsed(year, elapsed)
+        year, new_elapsed = reduce_elapsed_years(year, calendar_days)
+    month, day = date_from_elapsed(year, new_elapsed)
     return year, month, day
 
 
 def calculate_due_date(submit_time, turnaround):
     due_date = {}
-    submit_hour = submit_time["hour"]
     # minutes never change with integer hour increments
     due_date["minute"] = submit_time["minute"]
     # day shifting
-    due_date["hour"] = submit_hour + turnaround["working_hours"]
-    if submit_hour + turnaround["working_hours"] > 17:
-        due_date["hour"] = 9 + \
-            (turnaround["working_hours"] - (17-submit_hour))
+    submit_hour = submit_time["hour"]
+    working_hours = turnaround["working_hours"]
+    due_date["hour"] = submit_hour + working_hours
+    if submit_hour + working_hours > 17:
+        due_date["hour"] = 9 + (working_hours - (17-submit_hour))
         turnaround["working_days"] += 1
 
     weeks = turnaround["working_days"] // 5
@@ -59,11 +59,11 @@ def calculate_due_date(submit_time, turnaround):
 
 def date_from_elapsed(year, elapsed):
     months = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    if (is_leapyear(year)):
+    if is_leapyear(year):
         months[2] = 29
 
     for i in range(1, 13):
-        if (elapsed <= months[i]):
+        if elapsed <= months[i]:
             month = i
             day = elapsed
             return month, day
@@ -75,18 +75,18 @@ def date_from_elapsed(year, elapsed):
 def days_elapsed(year, month, day):
     elapsed = day
     monthly_cummulation = {
-        11: 334,
-        10: 304,
-        9: 273,
-        8: 243,
-        7: 212,
-        6: 181,
-        5: 151,
-        4: 120,
-        3: 90,
-        2: 59,
+        0: 0,
         1: 31,
-        0: 0
+        2: 59,
+        3: 90,
+        4: 120,
+        5: 151,
+        6: 181,
+        7: 212,
+        8: 243,
+        9: 273,
+        10: 304,
+        11: 334
     }
     elapsed += monthly_cummulation[month-1]
     if is_leapyear(year) and month > 2:
@@ -160,14 +160,13 @@ def reduce_elapsed_years(year, remaining_days):
     if is_leapyear(year):
         year_days = 366
 
-    while (remaining_days >= year_days):
+    while remaining_days >= year_days:
         remaining_days -= year_days
         year += 1
         year_days = 365
         if is_leapyear(year):
             year_days = 366
-    elapsed = remaining_days
-    return year, elapsed
+    return year, remaining_days
 
 
 def validate_input(user_input):

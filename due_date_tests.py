@@ -6,21 +6,29 @@ import due_date_calculator as calc
 class TestBadDates(unittest.TestCase):
 
     def test_bad_date_random(self):
-        with self.assertRaises(calc.CustomError):
+        with self.assertRaises(calc.CustomError) as CE:
             calc.validate_input("XXXX")
+        the_exception = CE.exception
+        self.assertEqual(the_exception.msg, "Invalid date exception")
 
     def test_bad_date_non_existent(self):
-        with self.assertRaises(calc.CustomError):
+        with self.assertRaises(calc.CustomError) as CE:
             calc.validate_input("2022.02.29. 13:00")
+        the_exception = CE.exception
+        self.assertEqual(the_exception.msg, "Invalid date exception")
 
     @patch('due_date_calculator.get_input_date', return_value='2022.01.29. 13:00')
     def test_bad_date_weekend(self, input):
-        with self.assertRaises(calc.CustomError):
+        with self.assertRaises(calc.CustomError) as CE:
             calc.read_date()
+        the_exception = CE.exception
+        self.assertEqual(the_exception.msg, "Weekend exception")
 
     def test_bad_date_weekday_out_of_worktime(self):
-        with self.assertRaises(calc.CustomError):
+        with self.assertRaises(calc.CustomError) as CE:
             calc.validate_input("2022.01.27. 17:01")
+        the_exception = CE.exception
+        self.assertEqual(the_exception.msg, "Invalid date exception")
 
 
 class TestBadTurnarounds(unittest.TestCase):
@@ -37,8 +45,10 @@ class TestBadTurnarounds(unittest.TestCase):
 
     @patch('due_date_calculator.get_input_turnaround', return_value='-1')
     def test_bad_turnaround_negative(self, input):
-        with self.assertRaises(calc.CustomError):
+        with self.assertRaises(calc.CustomError) as CE:
             calc.read_turnaround()
+        the_exception = CE.exception
+        self.assertEqual(the_exception.msg, "Negative turnaround exception")
 
 
 class TestNormalCases(unittest.TestCase):

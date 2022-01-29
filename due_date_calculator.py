@@ -3,7 +3,8 @@ import math
 
 
 class CustomError(Exception):
-    pass
+    def __init__(self, msg):
+        self.msg = msg
 
 
 def add_days_to_date(date, calendar_days):

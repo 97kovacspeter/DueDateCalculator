@@ -44,8 +44,8 @@ def calculate_due_date(submit_time, turnaround):
     # saturday, sunday shifting
     weekday_nr = weekday_number(year, month, day)
     if weekday_nr == 0:
-        year, month, day = add_days_to_date(submit_time, calendar_days + 1)
-        weekday_nr = 1
+        year, month, day = add_days_to_date(submit_time, calendar_days + 2)
+        weekday_nr = 2
     if weekday_nr == 6:
         year, month, day = add_days_to_date(submit_time, calendar_days + 2)
         weekday_nr = 1

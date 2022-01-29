@@ -6,10 +6,10 @@ class CustomError(Exception):
     pass
 
 
-def add_days_to_date(submit_time, calendar_days):
-    year = submit_time["year"]
-    month = submit_time["month"]
-    day = submit_time["day"]
+def add_days_to_date(date, calendar_days):
+    year = date["year"]
+    month = date["month"]
+    day = date["day"]
     elapsed = days_elapsed(year, month, day)
 
     remaining_days = 365 - elapsed
@@ -20,7 +20,7 @@ def add_days_to_date(submit_time, calendar_days):
     if calendar_days > remaining_days:
         calendar_days -= remaining_days
         year, elapsed = reduce_elapsed_years(year, calendar_days)
-        month, day = date_from_elapsed(year, elapsed)
+    month, day = date_from_elapsed(year, elapsed)
     return year, month, day
 
 
@@ -38,14 +38,22 @@ def calculate_due_date(submit_time, turnaround):
 
     weeks = turnaround["working_days"] // 5
     remaining_days = turnaround["working_days"] % 5
-
     calendar_days = weeks * 7 + remaining_days
 
     year, month, day = add_days_to_date(submit_time, calendar_days)
+    # saturday, sunday shifting
+    weekday_nr = weekday_number(year, month, day)
+    if weekday_nr == 0:
+        year, month, day = add_days_to_date(submit_time, calendar_days + 1)
+        weekday_nr = 1
+    if weekday_nr == 6:
+        year, month, day = add_days_to_date(submit_time, calendar_days + 2)
+        weekday_nr = 1
 
     due_date["year"] = year
     due_date["month"] = month
     due_date["day"] = day
+    due_date["weekday_name"] = weekday_name(weekday_nr)
     return due_date
 
 
@@ -90,6 +98,12 @@ def is_leapyear(year):
     if (year % 100 != 0 and year % 4 == 0 or year % 400 == 0):
         return True
     return False
+
+
+def pretty_string(element):
+    if element < 10:
+        element = "0" + str(element)
+    return element
 
 
 def process_submit_time(user_input):
@@ -188,15 +202,14 @@ def weekday_number(year, month, day):
 
 
 def write_date(due_date):
-    if due_date["month"] < 10:
-        due_date["month"] = "0" + str(due_date["month"])
-    if due_date["minute"] < 10:
-        due_date["minute"] = "0" + str(due_date["minute"])
+    due_date["month"] = pretty_string(due_date["month"])
+    due_date["day"] = pretty_string(due_date["day"])
+    due_date["minute"] = pretty_string(due_date["minute"])
     date = [str(due_date["year"]),
             str(due_date["month"]), str(due_date["day"])]
     time = [str(due_date["hour"]), str(due_date["minute"])]
     result = ".".join(date)
-    result += " "
+    result += " " + due_date["weekday_name"] + " "
     result += ":".join(time)
     print(result)
 

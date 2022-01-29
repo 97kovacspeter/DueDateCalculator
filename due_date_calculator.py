@@ -100,6 +100,16 @@ def is_leapyear(year):
     return False
 
 
+def get_input_date():
+    # needed for testing
+    return input()
+
+
+def get_input_turnaround():
+    # needed for testing
+    return input()
+
+
 def pretty_string(element):
     if element < 10:
         element = "0" + str(element)
@@ -134,7 +144,7 @@ def process_submit_time(user_input):
 
 
 def read_date():
-    user_input = input()
+    user_input = get_input_date()
     validate_input(user_input)
     submit_time = process_submit_time(user_input)
     if submit_time["weekday_name"] == "Saturday" or submit_time["weekday_name"] == "Sunday":
@@ -145,7 +155,7 @@ def read_date():
 def read_turnaround():
     # Raises ValueError if not integer is given
     turnaround = {}
-    turnaround["hours"] = int(input())
+    turnaround["hours"] = int(get_input_turnaround())
     hours = turnaround["hours"]
     if hours < 0:
         raise CustomError("Negative turnaround exception")
@@ -172,7 +182,7 @@ def reduce_elapsed_years(year, remaining_days):
 def validate_input(user_input):
     # Regex that validates the given yyyy.mm.dd hh:mm datetime format and 9AM - 5PM
     date_regex = re.compile(
-        r'(((\d{4})[.](0[13578]|10|12)[.](0[1-9]|[12][0-9]|3[01])[.]{0,1})|((\d{4})[.](0[469]|11)[.]([0][1-9]|[12][0-9]|30)[.]{0,1})|((\d{4})[.](02)[.](0[1-9]|1[0-9]|2[0-8])[.]{0,1})|(([02468][048]00)[.](02)[.](29)[.]{0,1})|(([13579][26]00)[.](02)[.](29)[.]{0,1})|(([0-9][0-9][0][48])[.](02)[.](29)[.]{0,1})|(([0-9][0-9][2468][048])[.](02)[.](29)[.]{0,1})|(([0-9][0-9][13579][26])[.](02)[.](29)[.]{0,1}))(\s(09|1[0-7]):([0-5][0-9]))')
+        r'(((\d{4})[.](0[13578]|10|12)[.](0[1-9]|[12][0-9]|3[01])[.]{0,1})|((\d{4})[.](0[469]|11)[.]([0][1-9]|[12][0-9]|30)[.]{0,1})|((\d{4})[.](02)[.](0[1-9]|1[0-9]|2[0-8])[.]{0,1})|(([02468][048]00)[.](02)[.](29)[.]{0,1})|(([13579][26]00)[.](02)[.](29)[.]{0,1})|(([0-9][0-9][0][48])[.](02)[.](29)[.]{0,1})|(([0-9][0-9][2468][048])[.](02)[.](29)[.]{0,1})|(([0-9][0-9][13579][26])[.](02)[.](29)[.]{0,1}))(\s(09|1[0-6]):([0-5][0-9]))')
     res = date_regex.fullmatch(user_input)
     if res is None:
         raise CustomError("Invalid date exception")
@@ -211,6 +221,7 @@ def write_date(due_date):
     result += " " + due_date["weekday_name"] + " "
     result += ":".join(time)
     print(result)
+    return result
 
 
 def main():
@@ -224,7 +235,7 @@ def main():
     turnaround = read_turnaround()
 
     due_date = calculate_due_date(submit_time, turnaround)
-    write_date(due_date)
+    return write_date(due_date)
 
 
 if __name__ == '__main__':

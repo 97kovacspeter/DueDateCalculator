@@ -12,8 +12,16 @@ def add_days_to_date(submit_time, calendar_days):
     day = submit_time["day"]
     elapsed = days_elapsed(year, month, day)
 
-    y, m, d = 2022, 1, 27
-    return y, m, d
+    remaining_days = 365 - elapsed
+    if is_leapyear(year):
+        remaining_days = 366 - elapsed
+
+    elapsed = elapsed + calendar_days
+    if calendar_days > remaining_days:
+        calendar_days -= remaining_days
+        year, elapsed = reduce_elapsed_years(year, calendar_days)
+        month, day = date_from_elapsed(year, elapsed)
+    return year, month, day
 
 
 def calculate_due_date(submit_time, turnaround):
@@ -33,12 +41,27 @@ def calculate_due_date(submit_time, turnaround):
 
     calendar_days = weeks * 7 + remaining_days
 
-    y, m, d = add_days_to_date(submit_time, calendar_days)
+    year, month, day = add_days_to_date(submit_time, calendar_days)
 
-    due_date["year"] = y
-    due_date["month"] = m
-    due_date["day"] = d
+    due_date["year"] = year
+    due_date["month"] = month
+    due_date["day"] = day
     return due_date
+
+
+def date_from_elapsed(year, elapsed):
+    months = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    if (is_leapyear(year)):
+        months[2] = 29
+
+    for i in range(1, 13):
+        if (elapsed <= months[i]):
+            month = i
+            day = elapsed
+            return month, day
+        elapsed = elapsed - months[i]
+
+    raise CustomError("Elapsed out of year")
 
 
 def days_elapsed(year, month, day):
@@ -115,6 +138,22 @@ def read_turnaround():
     turnaround["working_days"] = hours // 8
     turnaround["working_hours"] = hours % 8
     return turnaround
+
+
+def reduce_elapsed_years(year, remaining_days):
+    year += 1
+    year_days = 365
+    if is_leapyear(year):
+        year_days = 366
+
+    while (remaining_days >= year_days):
+        remaining_days -= year_days
+        year += 1
+        year_days = 365
+        if is_leapyear(year):
+            year_days = 366
+    elapsed = remaining_days
+    return year, elapsed
 
 
 def validate_input(user_input):
